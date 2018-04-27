@@ -7,19 +7,16 @@ from tornado.websocket import WebSocketHandler
 from tornado.web import Application, RequestHandler
 from tornado.ioloop import IOLoop
 
-class ZMQPubSub:
+class ZMQPair:
     def __init__(self,callback):
         self.callback = callback
     
     def connect(self):
         self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.SUB)
-        self.socket.connect('tcp://127.0.0.1:5560')
+        self.socket = self.context.socket(zmq.PAIR)
+        self.socket.bind('tcp://127.0.0.1:5560')
         self.stream = ZMQStream(self.socket)
         self.stream.on_recv(self.callback)
-
-    def subscribe(self,channel_id):
-        self.socket.setsockopt_string(zmq.SUBSCRIBE,channel_id)
 
 class MainHandler(RequestHandler):
     def get(self):
@@ -27,9 +24,8 @@ class MainHandler(RequestHandler):
 
 class WSHandler(WebSocketHandler):
     def open(self):
-        self.pubsub = ZMQPubSub(self.on_data)
-        self.pubsub.connect()
-        self.pubsub.subscribe('session_id')
+        self.pair = ZMQPair(self.on_data)
+        self.pair.connect()
         print('connection initialized')
 
     def on_message(self,message):
@@ -40,7 +36,7 @@ class WSHandler(WebSocketHandler):
         print('connection closed')
 
     def on_data(self,data):
-        print(data)
+        print(data[0])
         self.write_message(data[0])
 
     def check_origin(self,origin):
