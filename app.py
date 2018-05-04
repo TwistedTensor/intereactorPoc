@@ -1,6 +1,6 @@
 import zmq
-from zmq.eventloop import ioloop
 from zmq.eventloop.zmqstream import ZMQStream
+from zmq.eventloop import ioloop
 ioloop.install()
 
 from tornado.websocket import WebSocketHandler
