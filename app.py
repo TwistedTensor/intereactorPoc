@@ -10,8 +10,6 @@ from tornado.ioloop import IOLoop
 class ZMQPair:
     def __init__(self,callback):
         self.callback = callback
-    
-    def connect(self):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PAIR)
         self.socket.bind('tcp://127.0.0.1:5560')
@@ -25,7 +23,6 @@ class MainHandler(RequestHandler):
 class WSHandler(WebSocketHandler):
     def open(self):
         self.pair = ZMQPair(self.on_data)
-        self.pair.connect()
         print('connection initialized')
 
     def on_message(self,message):
@@ -36,7 +33,6 @@ class WSHandler(WebSocketHandler):
         print('connection closed')
 
     def on_data(self,data):
-        print(data)
         self.write_message(data[0])
 
     def check_origin(self,origin):
@@ -48,5 +44,4 @@ application = Application([
 ])
 if __name__ == "__main__":
     application.listen(8888)
-    io_loop = IOLoop.current()
-    io_loop.start()
+    IOLoop.instance().start()
