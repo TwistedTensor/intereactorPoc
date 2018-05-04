@@ -30,13 +30,13 @@ class WSHandler(WebSocketHandler):
 
     def on_message(self,message):
         print(message)
-        self.write_message(message[::-1])
+        self.pair.socket.send_string(message)
 
     def on_close(self):
         print('connection closed')
 
     def on_data(self,data):
-        print(data[0])
+        print(data)
         self.write_message(data[0])
 
     def check_origin(self,origin):
